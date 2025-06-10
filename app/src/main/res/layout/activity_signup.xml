@@ -1,0 +1,35 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:padding="32dp">
+
+    <!-- 사용자 아이디 입력 -->
+    <EditText
+        android:id="@+id/edtUserId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="아이디"
+        android:inputType="text"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- 비밀번호 입력 -->
+    <EditText
+        android:id="@+id/edtPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="비밀번호 (6자 이상)"
+        android:inputType="textPassword"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- 회원가입 버튼 -->
+    <Button
+        android:id="@+id/btnSignup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="회원가입"
+        android:backgroundTint="#5C4DB1"
+        android:textColor="#FFFFFF"/>
+</LinearLayout>

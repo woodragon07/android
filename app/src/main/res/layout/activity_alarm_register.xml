@@ -1,0 +1,60 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvDetailTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="약 알림 등록"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:paddingBottom="16dp"/>
+
+        <EditText
+            android:id="@+id/edtMedName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:hint="약 이름 입력"/>
+
+        <EditText
+            android:id="@+id/edtDays"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="복용 일수"
+            android:inputType="number" />
+
+        <Button
+            android:id="@+id/btnPickDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="처방 시작 날짜 선택" />
+
+        <RadioGroup
+            android:id="@+id/rgTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton android:id="@+id/radioMorning" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="아침"/>
+            <RadioButton android:id="@+id/radioLunch" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="점심"/>
+            <RadioButton android:id="@+id/radioDinner" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="저녁"/>
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="저장" />
+
+
+
+    </LinearLayout>
+</ScrollView>

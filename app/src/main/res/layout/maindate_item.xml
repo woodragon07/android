@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="72dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="8dp"
+    android:background="@drawable/bg_maindate_unselected">
+
+    <TextView
+        android:id="@+id/tvDayOfWeek"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="일"
+        android:textSize="14sp"
+        android:textColor="#FFFFFF"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/tvDay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="19"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:gravity="center"/>
+</LinearLayout>
