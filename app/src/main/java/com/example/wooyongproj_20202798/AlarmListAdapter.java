@@ -16,9 +16,15 @@ import java.util.List;
 public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.AlarmViewHolder> {
 
     private List<AlarmData> alarmList;
+    private String selectedDate;
 
-    public AlarmListAdapter(List<AlarmData> alarmList) {
+    public AlarmListAdapter(List<AlarmData> alarmList, String selectedDate) {
         this.alarmList = alarmList;
+        this.selectedDate = selectedDate;
+    }
+
+    public void setSelectedDate(String selectedDate) {
+        this.selectedDate = selectedDate;
     }
 
     @NonNull
@@ -32,10 +38,11 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.Alar
 
     @Override
     public void onBindViewHolder(@NonNull AlarmViewHolder holder, int position) {
-        AlarmData data = alarmList.get(position);
-        holder.tvMedName.setText(data.getMedName());
+        // 변수명을 alarmData로 사용해 다른 부분에서 혼동이 없도록 한다
+        AlarmData alarmData = alarmList.get(position);
+        holder.tvMedName.setText(alarmData.getMedName());
 
-        List<AlarmItem> items = data.getAlarmItems();
+        List<AlarmItem> items = alarmData.getAlarmItems();
         if (items == null) {
             holder.tvTimes.setText("복용 시간: 없음");
             return;
@@ -52,7 +59,7 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.Alar
             Context context = v.getContext();
             Intent intent = new Intent(context, AlarmDetailActivity.class);
             intent.putExtra("medName", alarmData.getMedName());
-            intent.putExtra("selectedDate", selectedDate); // 🔥 이 줄 추가!!
+            intent.putExtra("selectedDate", selectedDate);
             context.startActivity(intent);
         });
     }

@@ -41,6 +41,7 @@ public class MainHomeActivity extends AppCompatActivity {
         // 오늘 날짜 인덱스 = 30
         dateAdapter = new MainDateAdapter(this, dateList, item -> {
             selectedDate = item.getFormattedDate(); // 클릭된 날짜 저장
+            alarmAdapter.setSelectedDate(selectedDate); // 날짜 변경 시 어댑터에도 반영
             loadAlarmsForDate(selectedDate); // 날짜 바뀔 때마다 불러오기
         });
 
@@ -104,6 +105,7 @@ public class MainHomeActivity extends AppCompatActivity {
 
     private void loadAlarmsForDate(String dateKey) {
         alarmList.clear();
+        alarmAdapter.setSelectedDate(dateKey);
         String userId = FirebaseAuth.getInstance().getCurrentUser().getEmail().split("@")[0];
 
         FirebaseFirestore.getInstance()
