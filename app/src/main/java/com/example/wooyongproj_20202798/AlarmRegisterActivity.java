@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.wooyongproj_20202798.AlarmNotificationHelper;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -105,6 +106,7 @@ public class AlarmRegisterActivity extends AppCompatActivity {
                         .document(dateKey)
                         .set(data)
                         .addOnSuccessListener(aVoid -> {
+                            AlarmNotificationHelper.scheduleAlarms(this, dateKey, dayItems);
                             if (index == duration - 1) {
                                 Toast.makeText(this, "알림 저장 완료", Toast.LENGTH_SHORT).show();
                                 finish();

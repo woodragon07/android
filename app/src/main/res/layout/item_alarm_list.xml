@@ -21,4 +21,13 @@
         android:text="복용 시간대"
         android:textSize="14sp"
         android:layout_marginTop="4dp" />
+
+    <ImageButton
+        android:id="@+id/btnDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_delete"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:layout_gravity="end"
+        android:contentDescription="삭제" />
 </LinearLayout>
