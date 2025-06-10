@@ -1,10 +1,13 @@
 package com.example.wooyongproj_20202798;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
+import android.Manifest;
+import android.content.pm.PackageManager;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -34,6 +37,8 @@ public class MainHomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_home);
+
+        requestNotificationPermission();
 
         rvDateList = findViewById(R.id.rvDateList);
         dateList = generateDatesAroundToday(30); // 오늘 기준 ±30일 → 총 61개
@@ -127,5 +132,13 @@ public class MainHomeActivity extends AppCompatActivity {
                     Log.e("FIRESTORE", "알림 불러오기 실패: " + e.getMessage());
                     alarmAdapter.notifyDataSetChanged();
                 });
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1001);
+            }
+        }
     }
 }
