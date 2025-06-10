@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.wooyongproj_20202798.AlarmNotificationHelper;
 
 import java.util.ArrayList;
 
@@ -93,6 +94,8 @@ public class AlarmDetailActivity extends AppCompatActivity {
                 .document(selectedDate)
                 .set(updatedData)
                 .addOnSuccessListener(aVoid -> {
+                    AlarmNotificationHelper.cancelAlarms(this, selectedDate, alarmItems.size());
+                    AlarmNotificationHelper.scheduleAlarms(this, selectedDate, alarmItems);
                     Toast.makeText(this, "저장 완료!", Toast.LENGTH_SHORT).show();
                     finish();
                 })
