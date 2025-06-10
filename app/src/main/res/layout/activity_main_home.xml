@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@color/gray_light">
 
     <!-- 날짜 리스트 -->
     <androidx.recyclerview.widget.RecyclerView
@@ -12,25 +13,34 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp" />
 
+    <!-- 오늘의 약 복용률 헤더 -->
+    <include
+        android:id="@+id/dailyProgressHeader"
+        layout="@layout/daily_progress_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <!--알림 추가 버튼-->
     <Button
         android:id="@+id/btnAddAlarm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="약 알림 등록하기"
-        android:layout_marginTop="16dp"
-        android:backgroundTint="#FF77AA"
-        android:textColor="#FFFFFF"/>
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="#fb9cd3"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:elevation="2dp"
+        android:padding="12dp" />
 
     <!-- 알림리스트 -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvAlarmList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp" />
 
-
-    <!-- 나중에 약 정보가 표시될 영역 -->
-    <!-- 추후 연결 -->
 </LinearLayout>

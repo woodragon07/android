@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- 둥근 모서리 -->
+    <corners android:radius="16dp" />
+
+    <!-- 그라데이션 배경 -->
+    <gradient
+        android:startColor="#FFF8FB"
+        android:endColor="#FCE4EC"
+        android:angle="135" />
+
+    <!-- 테두리 -->
+    <stroke
+        android:width="1dp"
+        android:color="#FADCE7" />
+
+</shape>

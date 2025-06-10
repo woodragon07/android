@@ -79,11 +79,9 @@ public class AlarmRegisterActivity extends AppCompatActivity {
             start.set(Calendar.MONTH, Integer.parseInt(parts[1]) - 1);
             start.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parts[2]));
 
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-
+            // 🔧 수정: MedicationManager 사용해서 저장
+            List<String> dateList = new ArrayList<>();
             for (int i = 0; i < duration; i++) {
-                final int index = i;
-
                 Calendar target = (Calendar) start.clone();
                 target.add(Calendar.DAY_OF_MONTH, i);
 
@@ -92,33 +90,31 @@ public class AlarmRegisterActivity extends AppCompatActivity {
                         target.get(Calendar.MONTH) + 1,
                         target.get(Calendar.DAY_OF_MONTH));
 
-                // 🔧 리스트를 매번 새로 생성해야 Firebase에서 오류 안남
-                List<AlarmItem> dayItems = new ArrayList<>();
-                dayItems.add(new AlarmItem("아침", "08:00", true));
-                dayItems.add(new AlarmItem("점심", "12:00", true));
-                dayItems.add(new AlarmItem("저녁", "18:00", true));
-
-                AlarmData data = new AlarmData(medNameText, dayItems, dateKey);
-
-                db.collection("users")
-                        .document(userId)
-                        .collection("alarms")
-                        .document(dateKey)
-                        .set(data)
-                        .addOnSuccessListener(aVoid -> {
-                            AlarmNotificationHelper.scheduleAlarms(this, dateKey, dayItems);
-                            if (index == duration - 1) {
-                                Toast.makeText(this, "알림 저장 완료", Toast.LENGTH_SHORT).show();
-                                finish();
-                            }
-                        })
-                        .addOnFailureListener(e -> {
-                            Toast.makeText(this, "저장 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            Log.e("SAVE_FAIL", e.getMessage());
-                        });
+                dateList.add(dateKey);
             }
-        });
 
+            List<AlarmItem> dayItems = new ArrayList<>();
+            dayItems.add(new AlarmItem("아침", "08:00", true));
+            dayItems.add(new AlarmItem("점심", "12:00", true));
+            dayItems.add(new AlarmItem("저녁", "18:00", true));
+
+            // MedicationManager로 저장 (여러 알람 지원)
+            MedicationManager medicationManager = new MedicationManager(userId);
+            medicationManager.saveMedicationAlarmsMultiple(medNameText, dateList, dayItems, this,
+                    new MedicationManager.OnCompleteListener() {
+                        @Override
+                        public void onSuccess() {
+                            Toast.makeText(AlarmRegisterActivity.this, "알림 저장 완료", Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            Toast.makeText(AlarmRegisterActivity.this, "저장 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Log.e("AlarmRegister", "저장 실패", e);
+                        }
+                    });
+        });
     }
 
     private String getCurrentUserId() {

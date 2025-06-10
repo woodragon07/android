@@ -1,33 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="12dp"
-    android:background="@drawable/bg_alarm_item_list"
-    android:layout_marginBottom="8dp">
+    android:padding="16dp"
+    android:background="@drawable/bg_alarm_item_enhanced"
+    android:layout_marginBottom="12dp"
+    android:elevation="2dp">
 
-    <TextView
-        android:id="@+id/tvMedName"
-        android:layout_width="wrap_content"
+    <!-- 상단: 약 이름과 삭제 버튼 -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="약 이름"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
+        <!-- 약 이름 -->
+        <TextView
+            android:id="@+id/tvMedName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="약 이름"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary" />
+
+        <!-- 삭제 버튼 -->
+        <ImageButton
+            android:id="@+id/btnDelete"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@android:drawable/ic_delete"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="삭제"
+            android:scaleType="centerInside" />
+
+    </LinearLayout>
+
+    <!-- 복용률 섹션 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="복용률: "
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary" />
+
+        <!-- 커스텀 프로그레스 바 -->
+        <include
+            android:id="@+id/progressBar"
+            layout="@layout/custom_progress_bar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+
+    <!-- 체크박스 섹션 -->
+    <LinearLayout
+        android:id="@+id/layoutCheckboxes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="복용 체크: "
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginEnd="12dp" />
+
+        <!-- 동적으로 체크박스들이 추가될 컨테이너 -->
+        <LinearLayout
+            android:id="@+id/containerCheckboxes"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <!-- 동적으로 생성될 체크박스들을 위한 공간 -->
+            <!-- 예시: 기본 체크박스들 (나중에 동적으로 대체) -->
+            <CheckBox
+                android:id="@+id/cbMorning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="아침"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+            <CheckBox
+                android:id="@+id/cbLunch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="점심"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+            <CheckBox
+                android:id="@+id/cbEvening"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="저녁"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- 복용 시간 정보 (기존) -->
     <TextView
         android:id="@+id/tvTimes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="복용 시간대"
-        android:textSize="14sp"
-        android:layout_marginTop="4dp" />
+        android:textSize="12sp"
+        android:textColor="@color/text_hint"
+        android:layout_marginTop="8dp" />
 
-    <ImageButton
-        android:id="@+id/btnDelete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_delete"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:layout_gravity="end"
-        android:contentDescription="삭제" />
 </LinearLayout>

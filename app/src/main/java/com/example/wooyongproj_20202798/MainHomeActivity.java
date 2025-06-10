@@ -1,5 +1,6 @@
 package com.example.wooyongproj_20202798;
 
+import java.util.List; // 이미 있을 수 있음
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -8,6 +9,13 @@ import android.widget.Button;
 import android.widget.Toast;
 import android.Manifest;
 import android.content.pm.PackageManager;
+
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.ProgressBar;
+import android.view.ViewGroup;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -24,7 +32,7 @@ import java.util.List;
 public class MainHomeActivity extends AppCompatActivity {
 
     private static final String TAG = "MainHomeActivity";
-
+    private IntakeManager intakeManager;
     private RecyclerView rvDateList;
     private MainDateAdapter dateAdapter;
     private List<MainDateItem> dateList;
@@ -50,6 +58,8 @@ public class MainHomeActivity extends AppCompatActivity {
         // 약물 관리자 초기화
         String userId = getCurrentUserId();
         medicationManager = new MedicationManager(userId);
+
+        intakeManager = new IntakeManager(userId, this);
 
         // 날짜 리스트 초기화
         initializeDateList();
@@ -89,7 +99,10 @@ public class MainHomeActivity extends AppCompatActivity {
     private void initializeAlarmList() {
         rvAlarmList = findViewById(R.id.rvAlarmList);
         rvAlarmList.setLayoutManager(new LinearLayoutManager(this));
-        alarmAdapter = new AlarmListAdapter(alarmList, selectedDate);
+
+        // 🔧 수정: Context를 포함한 생성자 사용
+        alarmAdapter = new AlarmListAdapter(alarmList, selectedDate, this);
+
         rvAlarmList.setAdapter(alarmAdapter);
     }
 
@@ -177,6 +190,9 @@ public class MainHomeActivity extends AppCompatActivity {
                     alarmList.addAll(alarmDataList);
                     alarmAdapter.updateAlarmList(alarmDataList);
 
+                    // 🔧 추가: 알람 로드 완료 후 전체 복용률 업데이트
+                    updateDailyProgress();
+
                     // 첫 로드일 때 로그 출력
                     if (isInitialLoad) {
                         isInitialLoad = false;
@@ -224,12 +240,93 @@ public class MainHomeActivity extends AppCompatActivity {
         super.onResume();
         Log.d(TAG, "onResume - 현재 선택된 날짜: " + selectedDate);
 
-        // 화면으로 돌아올 때마다 현재 선택된 날짜의 최신 데이터 로드
+        // 수정: 항상 다시 로드하지 말고, 필요할 때만
+        // if (!selectedDate.isEmpty()) {
+        //     Log.d(TAG, "onResume에서 데이터 다시 로드");
+        //     loadAlarmsForDate(selectedDate);
+        // }
+
+        // 대신 이렇게 변경:
+        Log.d(TAG, "onResume - 현재 알람 개수: " + alarmList.size());
+        // 목록이 비어있을 때만 다시 로드
+        // 수정: 항상 최신 데이터 로드 (AlarmDetailActivity에서 돌아올 때도)
         if (!selectedDate.isEmpty()) {
             Log.d(TAG, "onResume에서 데이터 다시 로드");
             loadAlarmsForDate(selectedDate);
         }
     }
+
+
+
+    // MainHomeActivity.java에 추가
+// MainHomeActivity.java에 추가
+    public void updateDailyProgress() {
+        if (intakeManager != null && alarmList != null) {
+            Log.d(TAG, "updateDailyProgress 호출됨");
+
+            // 🔧 수정: 실제 복용 상태 데이터를 먼저 조회
+            intakeManager.getIntakeStatusForDate(selectedDate, new IntakeManager.OnIntakeLoadedListener() {
+                @Override
+                public void onIntakeLoaded(List<MedicationIntake> intakeList) {
+                    // 실제 복용 상태로 계산
+                    int overallProgress = IntakeManager.calculateOverallCompletionRate(intakeList, alarmList);
+
+                    Log.d("MainHome", "전체 복용률 업데이트: " + overallProgress + "%");
+
+                    runOnUiThread(() -> {
+                        // 🔧 실제 UI 업데이트 (전체 복용률 표시 요소의 실제 ID 사용)
+                        updateDailyProgressUI(overallProgress);
+                    });
+                }
+
+                @Override
+                public void onLoadFailed(Exception e) {
+                    Log.e("MainHome", "복용률 계산 실패", e);
+                }
+            });
+        }
+    }
+
+    // 🔧 추가: UI 업데이트 헬퍼 메서드
+    private void updateDailyProgressUI(int progress) {
+        // overallProgressBar는 custom_progress_bar.xml을 include한 것
+        View overallProgressBar = findViewById(R.id.overallProgressBar);
+
+        if (overallProgressBar != null) {
+            // 커스텀 프로그레스 바의 요소들 찾기
+            View progressFill = overallProgressBar.findViewById(R.id.progressFill);
+            TextView tvPercentage = overallProgressBar.findViewById(R.id.tvPercentage);
+
+            if (progressFill != null && tvPercentage != null) {
+                // 퍼센트 텍스트 업데이트
+                tvPercentage.setText(progress + "%");
+
+                // 프로그레스 바 업데이트
+                ViewGroup progressContainer = (ViewGroup) progressFill.getParent(); // FrameLayout
+                if (progressContainer != null) {
+                    progressContainer.post(() -> {
+                        int containerWidth = progressContainer.getWidth();
+                        if (containerWidth > 0) {
+                            // 진행률에 따른 width 계산
+                            int fillWidth = (int) (containerWidth * progress / 100.0);
+
+                            // progressFill의 width 설정
+                            ViewGroup.LayoutParams params = progressFill.getLayoutParams();
+                            params.width = fillWidth;
+                            progressFill.setLayoutParams(params);
+                        }
+                    });
+                }
+
+                Log.d("MainHome", "전체 복용률 UI 업데이트 완료: " + progress + "%");
+            } else {
+                Log.w("MainHome", "커스텀 프로그레스 바 요소를 찾을 수 없음");
+            }
+        } else {
+            Log.w("MainHome", "overallProgressBar를 찾을 수 없음");
+        }
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {

@@ -41,4 +41,11 @@ public class AlarmData {
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }
 
+    // 🔧 추가: Firebase 배열 구조 지원
+    private List<AlarmData> alarms;  // Firestore 배열 필드
+
+    public List<AlarmData> getAlarms() { return alarms; }
+    public void setAlarms(List<AlarmData> alarms) { this.alarms = alarms; }
 }
+
+
