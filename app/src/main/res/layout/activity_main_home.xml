@@ -1,46 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@color/gray_light">
+    android:background="@color/background_light">
 
-    <!-- 날짜 리스트 -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvDateList"
+    <!-- 상단 헤더 -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp" />
+        android:orientation="vertical"
+        android:background="#fb9cd3"
+        android:elevation="4dp">
 
-    <!-- 오늘의 약 복용률 헤더 -->
-    <include
-        android:id="@+id/dailyProgressHeader"
-        layout="@layout/daily_progress_header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        <!-- 날짜 리스트 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvDateList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:clipToPadding="false" />
 
-    <!--알림 추가 버튼-->
-    <Button
-        android:id="@+id/btnAddAlarm"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="약 알림 등록하기"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="#fb9cd3"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:elevation="2dp"
-        android:padding="12dp" />
+        <!-- 오늘의 약 복용률 헤더 -->
+        <include
+            android:id="@+id/dailyProgressHeader"
+            layout="@layout/daily_progress_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp" />
 
-    <!-- 알림리스트 -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvAlarmList"
+    </LinearLayout>
+
+    <!-- 메인 컨텐츠 -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:clipToPadding="false"
-        android:paddingBottom="16dp" />
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- 알림 등록 버튼 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="6dp"
+            app:cardBackgroundColor="#fb9cd3"
+            android:layout_marginBottom="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="💊"
+                    android:textSize="24sp"
+                    android:layout_marginEnd="12dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="새 알림 추가"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="약물 알림을 등록하세요"
+                        android:textSize="12sp"
+                        android:textColor="#E8F4FD" />
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnAddAlarm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="등록하기"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="#fb9cd3"
+                    android:background="@drawable/white_button_background"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- 알림 목록 섹션 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- 섹션 헤더 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="📋 오늘의 약물"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="체크하여 복용 확인"
+                    android:textSize="12sp"
+                    android:textColor="#999999" />
+
+            </LinearLayout>
+
+            <!-- 알림 리스트 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFFFF">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvAlarmList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:padding="8dp" />
+
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </LinearLayout>
