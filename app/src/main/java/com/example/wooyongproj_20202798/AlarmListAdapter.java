@@ -1,123 +1,159 @@
-diff --git a/app/src/main/java/com/example/wooyongproj_20202798/AlarmListAdapter.java b/app/src/main/java/com/example/wooyongproj_20202798/AlarmListAdapter.java
-index b624a0056e1fe4fd4593db93f882590ef2343531..d9be43a4b81e80cfb73aac6c90c76f08ca2e8533 100644
---- a/app/src/main/java/com/example/wooyongproj_20202798/AlarmListAdapter.java
-+++ b/app/src/main/java/com/example/wooyongproj_20202798/AlarmListAdapter.java
-@@ -1,36 +1,42 @@
- package com.example.wooyongproj_20202798;
- 
- import android.content.Context;
- import android.content.Intent;
-+import android.widget.Toast;
- import android.view.LayoutInflater;
- import android.view.View;
- import android.view.ViewGroup;
-+import android.widget.ImageButton;
- import android.widget.TextView;
- 
- import androidx.annotation.NonNull;
- import androidx.recyclerview.widget.RecyclerView;
-+import com.google.firebase.auth.FirebaseAuth;
-+import com.google.firebase.firestore.FirebaseFirestore;
-+import com.google.firebase.firestore.QueryDocumentSnapshot;
-+import com.example.wooyongproj_20202798.AlarmNotificationHelper;
- 
- import java.util.ArrayList;
- import java.util.List;
- 
- public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.AlarmViewHolder> {
- 
-     private List<AlarmData> alarmList;
-     private String selectedDate;
- 
-     public AlarmListAdapter(List<AlarmData> alarmList, String selectedDate) {
-         this.alarmList = alarmList;
-         this.selectedDate = selectedDate;
-     }
- 
-     public void setSelectedDate(String selectedDate) {
-         this.selectedDate = selectedDate;
-     }
- 
-     @NonNull
-     @Override
-     public AlarmViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-         View view = LayoutInflater.from(parent.getContext())
-                 .inflate(R.layout.item_alarm_list, parent, false);
-         return new AlarmViewHolder(view);
-     }
-diff --git a/app/src/main/java/com/example/wooyongproj_20202798/AlarmListAdapter.java b/app/src/main/java/com/example/wooyongproj_20202798/AlarmListAdapter.java
-index b624a0056e1fe4fd4593db93f882590ef2343531..d9be43a4b81e80cfb73aac6c90c76f08ca2e8533 100644
---- a/app/src/main/java/com/example/wooyongproj_20202798/AlarmListAdapter.java
-+++ b/app/src/main/java/com/example/wooyongproj_20202798/AlarmListAdapter.java
-@@ -40,45 +46,71 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.Alar
-     public void onBindViewHolder(@NonNull AlarmViewHolder holder, int position) {
-         // 변수명을 alarmData로 사용해 다른 부분에서 혼동이 없도록 한다
-         AlarmData alarmData = alarmList.get(position);
-         holder.tvMedName.setText(alarmData.getMedName());
- 
-         List<AlarmItem> items = alarmData.getAlarmItems();
-         if (items == null) {
-             holder.tvTimes.setText("복용 시간: 없음");
-             return;
-         }
- 
-         List<String> labels = new ArrayList<>();
-         for (AlarmItem item : items) {
-             labels.add(item.getLabel());
-         }
-         holder.tvTimes.setText("복용 시간: " + String.join(", ", labels));
- 
-         // 상세 편집 화면으로 이동하는 클릭 리스너 추가
-         holder.itemView.setOnClickListener(v -> {
-             Context context = v.getContext();
-             Intent intent = new Intent(context, AlarmDetailActivity.class);
-             intent.putExtra("medName", alarmData.getMedName());
-             intent.putExtra("selectedDate", selectedDate);
-             context.startActivity(intent);
-         });
-+
-+        holder.btnDelete.setOnClickListener(v -> {
-+            Context context = v.getContext();
-+            String userId = FirebaseAuth.getInstance().getCurrentUser().getEmail().split("@")[0];
-+            FirebaseFirestore db = FirebaseFirestore.getInstance();
-+
-+            db.collection("users")
-+                    .document(userId)
-+                    .collection("alarms")
-+                    .whereEqualTo("medName", alarmData.getMedName())
-+                    .get()
-+                    .addOnSuccessListener(querySnapshot -> {
-+                        for (QueryDocumentSnapshot doc : querySnapshot) {
-+                            AlarmData data = doc.toObject(AlarmData.class);
-+                            AlarmNotificationHelper.cancelAlarms(context, doc.getId(), data.getAlarmItems().size());
-+                            doc.getReference().delete();
-+                        }
-+
-+                        int pos = holder.getAdapterPosition();
-+                        alarmList.remove(pos);
-+                        notifyItemRemoved(pos);
-+                    })
-+                    .addOnFailureListener(e -> Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show());
-+        });
-     }
- 
- 
- 
- 
-     @Override
-     public int getItemCount() {
-         return alarmList.size();
-     }
- 
-     public static class AlarmViewHolder extends RecyclerView.ViewHolder {
-         TextView tvMedName, tvTimes;
-+        ImageButton btnDelete;
- 
-         public AlarmViewHolder(@NonNull View itemView) {
-             super(itemView);
-             tvMedName = itemView.findViewById(R.id.tvMedName);
-             tvTimes = itemView.findViewById(R.id.tvTimes);
-+            btnDelete = itemView.findViewById(R.id.btnDelete);
-         }
-     }
- }
+package com.example.wooyongproj_20202798;
+
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
+import android.widget.Toast;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.AlarmViewHolder> {
+
+    private static final String TAG = "AlarmListAdapter";
+
+    private List<AlarmData> alarmList;
+    private String selectedDate;
+    private MedicationManager medicationManager;
+
+    public AlarmListAdapter(List<AlarmData> alarmList, String selectedDate) {
+        this.alarmList = alarmList;
+        this.selectedDate = selectedDate;
+
+        String userId = getCurrentUserId();
+        if (userId != null) {
+            this.medicationManager = new MedicationManager(userId);
+        }
+    }
+
+    public void setSelectedDate(String selectedDate) {
+        this.selectedDate = selectedDate;
+    }
+
+    // 알람 목록 업데이트 메서드
+    public void updateAlarmList(List<AlarmData> newAlarmList) {
+        this.alarmList.clear();
+        this.alarmList.addAll(newAlarmList);
+        notifyDataSetChanged();
+        Log.d(TAG, "알람 목록 업데이트됨: " + alarmList.size() + "개");
+    }
+
+    @NonNull
+    @Override
+    public AlarmViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_alarm_list, parent, false);
+        return new AlarmViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull AlarmViewHolder holder, int position) {
+        AlarmData alarmData = alarmList.get(position);
+        holder.tvMedName.setText(alarmData.getMedName());
+
+        List<AlarmItem> items = alarmData.getAlarmItems();
+        if (items == null || items.isEmpty()) {
+            holder.tvTimes.setText("복용 시간: 없음");
+        } else {
+            List<String> activeLabels = new ArrayList<>();
+            for (AlarmItem item : items) {
+                if (item.isEnabled()) {
+                    activeLabels.add(item.getLabel() + "(" + item.getTime() + ")");
+                }
+            }
+
+            if (activeLabels.isEmpty()) {
+                holder.tvTimes.setText("활성화된 알람: 없음");
+            } else {
+                holder.tvTimes.setText("활성 알람: " + String.join(", ", activeLabels));
+            }
+        }
+
+        // 상세 편집 화면으로 이동하는 클릭 리스너
+        holder.itemView.setOnClickListener(v -> {
+            Context context = v.getContext();
+            Intent intent = new Intent(context, AlarmDetailActivity.class);
+            intent.putExtra("medName", alarmData.getMedName());
+            intent.putExtra("selectedDate", selectedDate);
+            context.startActivity(intent);
+        });
+
+        // 삭제 버튼 클릭 리스너 (약물 전체 삭제)
+        if (holder.btnDelete != null) {
+            holder.btnDelete.setOnClickListener(v -> {
+                Context context = v.getContext();
+
+                if (medicationManager == null) {
+                    Toast.makeText(context, "사용자 인증 실패", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // 확인 다이얼로그 표시
+                new androidx.appcompat.app.AlertDialog.Builder(context)
+                        .setTitle("약물 삭제")
+                        .setMessage("'" + alarmData.getMedName() + "' 약물을 모든 날짜에서 완전히 삭제하시겠습니까?")
+                        .setPositiveButton("삭제", (dialog, which) -> {
+                            // 전체 약물 삭제
+                            medicationManager.deleteMedication(alarmData.getMedName(), context,
+                                    new MedicationManager.OnCompleteListener() {
+                                        @Override
+                                        public void onSuccess() {
+                                            int pos = holder.getAdapterPosition();
+                                            if (pos != RecyclerView.NO_POSITION) {
+                                                alarmList.remove(pos);
+                                                notifyItemRemoved(pos);
+                                                Toast.makeText(context, "약물이 완전히 삭제되었습니다", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(Exception e) {
+                                            Toast.makeText(context, "삭제 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                            Log.e(TAG, "약물 삭제 실패", e);
+                                        }
+                                    });
+                        })
+                        .setNegativeButton("취소", null)
+                        .show();
+            });
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        return alarmList.size();
+    }
+
+    // Firebase 사용자 ID 가져오기
+    private String getCurrentUserId() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null && user.getEmail() != null) {
+            return user.getEmail().split("@")[0];
+        }
+        return null;
+    }
+
+    public static class AlarmViewHolder extends RecyclerView.ViewHolder {
+        TextView tvMedName, tvTimes;
+        ImageButton btnDelete;
+
+        public AlarmViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvMedName = itemView.findViewById(R.id.tvMedName);
+            tvTimes = itemView.findViewById(R.id.tvTimes);
+
+            // 삭제 버튼이 레이아웃에 있는 경우에만 참조
+            btnDelete = itemView.findViewById(R.id.btnDelete);
+        }
+    }
+}
