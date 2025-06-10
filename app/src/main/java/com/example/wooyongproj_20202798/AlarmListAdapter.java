@@ -2,13 +2,18 @@ package com.example.wooyongproj_20202798;
 
 import android.content.Context;
 import android.content.Intent;
+import android.widget.Toast;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.wooyongproj_20202798.AlarmNotificationHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +67,24 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.Alar
             intent.putExtra("selectedDate", selectedDate);
             context.startActivity(intent);
         });
+
+        holder.btnDelete.setOnClickListener(v -> {
+            Context context = v.getContext();
+            String userId = FirebaseAuth.getInstance().getCurrentUser().getEmail().split("@")[0];
+            FirebaseFirestore.getInstance()
+                    .collection("users")
+                    .document(userId)
+                    .collection("alarms")
+                    .document(selectedDate)
+                    .delete()
+                    .addOnSuccessListener(aVoid -> {
+                        AlarmNotificationHelper.cancelAlarms(context, selectedDate, alarmData.getAlarmItems().size());
+                        int pos = holder.getAdapterPosition();
+                        alarmList.remove(pos);
+                        notifyItemRemoved(pos);
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show());
+        });
     }
 
 
@@ -74,11 +97,13 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.Alar
 
     public static class AlarmViewHolder extends RecyclerView.ViewHolder {
         TextView tvMedName, tvTimes;
+        ImageButton btnDelete;
 
         public AlarmViewHolder(@NonNull View itemView) {
             super(itemView);
             tvMedName = itemView.findViewById(R.id.tvMedName);
             tvTimes = itemView.findViewById(R.id.tvTimes);
+            btnDelete = itemView.findViewById(R.id.btnDelete);
         }
     }
 }

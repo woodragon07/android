@@ -9,7 +9,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.wooyongproj_20202798.AlarmNotificationHelper;
 
 import java.util.ArrayList;
 
@@ -20,7 +23,7 @@ public class AlarmDetailActivity extends AppCompatActivity {
     private ArrayList<AlarmItem> alarmItems = new ArrayList<>();
     private FirebaseFirestore db;
 
-    private String userId = "zxcxzc123"; // 🔥 Firestore 콘솔에 저장된 사용자 ID
+    private String userId;               // Firebase에 저장된 사용자 ID
     private String selectedDate;         // ex: "2025-06-09"
     private Button btnSave;
 
@@ -30,6 +33,7 @@ public class AlarmDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_alarm_detail);
 
         db = FirebaseFirestore.getInstance();
+        userId = getCurrentUserId();
 
         recyclerView = findViewById(R.id.recyclerViewAlarmDetail);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -90,11 +94,21 @@ public class AlarmDetailActivity extends AppCompatActivity {
                 .document(selectedDate)
                 .set(updatedData)
                 .addOnSuccessListener(aVoid -> {
+                    AlarmNotificationHelper.cancelAlarms(this, selectedDate, alarmItems.size());
+                    AlarmNotificationHelper.scheduleAlarms(this, selectedDate, alarmItems);
                     Toast.makeText(this, "저장 완료!", Toast.LENGTH_SHORT).show();
                     finish();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "저장 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    private String getCurrentUserId() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null && user.getEmail() != null) {
+            return user.getEmail().split("@")[0];
+        }
+        return "unknown_user";
     }
 }
