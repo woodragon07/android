@@ -9,7 +9,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.wooyongproj_20202798.AlarmNotificationHelper;
 
 import java.util.ArrayList;
 
@@ -20,8 +23,10 @@ public class AlarmDetailActivity extends AppCompatActivity {
     private ArrayList<AlarmItem> alarmItems = new ArrayList<>();
     private FirebaseFirestore db;
 
-    private String userId = "zxcxzc123"; // 🔥 Firestore 콘솔에 저장된 사용자 ID
+    private String userId;               // Firebase에 저장된 사용자 ID
     private String selectedDate;         // ex: "2025-06-09"
+    private String medName;              // 약 이름
+    private int originalItemCount = 0;   // 기존 알림 개수
     private Button btnSave;
 
     @Override
@@ -30,6 +35,7 @@ public class AlarmDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_alarm_detail);
 
         db = FirebaseFirestore.getInstance();
+        userId = getCurrentUserId();
 
         recyclerView = findViewById(R.id.recyclerViewAlarmDetail);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -39,6 +45,7 @@ public class AlarmDetailActivity extends AppCompatActivity {
         btnSave = findViewById(R.id.btnSave);
 
         selectedDate = getIntent().getStringExtra("selectedDate");
+        medName = getIntent().getStringExtra("medName");
 
         // ✅ 디버깅 로그 출력
         Log.d("AlarmDetail", "userId: " + userId);
@@ -66,6 +73,7 @@ public class AlarmDetailActivity extends AppCompatActivity {
                         if (alarmData != null && alarmData.getAlarmItems() != null) {
                             alarmItems.clear();
                             alarmItems.addAll(alarmData.getAlarmItems());
+                            originalItemCount = alarmItems.size();
                             adapter.notifyDataSetChanged();
                         }
                     } else {
@@ -80,7 +88,7 @@ public class AlarmDetailActivity extends AppCompatActivity {
 
     private void saveAlarmDataToFirestore() {
         AlarmData updatedData = new AlarmData();
-        updatedData.setMedName("kamki"); // TODO: 실제 이름 연동 필요 시 수정
+        updatedData.setMedName(medName == null ? "" : medName);
         updatedData.setAlarmItems(alarmItems);
         updatedData.setDate(selectedDate);
 
@@ -90,11 +98,21 @@ public class AlarmDetailActivity extends AppCompatActivity {
                 .document(selectedDate)
                 .set(updatedData)
                 .addOnSuccessListener(aVoid -> {
+                    AlarmNotificationHelper.cancelAlarms(this, selectedDate, originalItemCount);
+                    AlarmNotificationHelper.scheduleAlarms(this, selectedDate, alarmItems);
                     Toast.makeText(this, "저장 완료!", Toast.LENGTH_SHORT).show();
                     finish();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "저장 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    private String getCurrentUserId() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null && user.getEmail() != null) {
+            return user.getEmail().split("@")[0];
+        }
+        return "unknown_user";
     }
 }
