@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.example.wooyongproj_20202798.AlarmNotificationHelper;
 
 import java.util.ArrayList;
@@ -71,14 +72,20 @@ public class AlarmListAdapter extends RecyclerView.Adapter<AlarmListAdapter.Alar
         holder.btnDelete.setOnClickListener(v -> {
             Context context = v.getContext();
             String userId = FirebaseAuth.getInstance().getCurrentUser().getEmail().split("@")[0];
-            FirebaseFirestore.getInstance()
-                    .collection("users")
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+            db.collection("users")
                     .document(userId)
                     .collection("alarms")
-                    .document(selectedDate)
-                    .delete()
-                    .addOnSuccessListener(aVoid -> {
-                        AlarmNotificationHelper.cancelAlarms(context, selectedDate, alarmData.getAlarmItems().size());
+                    .whereEqualTo("medName", alarmData.getMedName())
+                    .get()
+                    .addOnSuccessListener(querySnapshot -> {
+                        for (QueryDocumentSnapshot doc : querySnapshot) {
+                            AlarmData data = doc.toObject(AlarmData.class);
+                            AlarmNotificationHelper.cancelAlarms(context, doc.getId(), data.getAlarmItems().size());
+                            doc.getReference().delete();
+                        }
+
                         int pos = holder.getAdapterPosition();
                         alarmList.remove(pos);
                         notifyItemRemoved(pos);

@@ -25,6 +25,8 @@ public class AlarmDetailActivity extends AppCompatActivity {
 
     private String userId;               // Firebase에 저장된 사용자 ID
     private String selectedDate;         // ex: "2025-06-09"
+    private String medName;              // 약 이름
+    private int originalItemCount = 0;   // 기존 알림 개수
     private Button btnSave;
 
     @Override
@@ -43,6 +45,7 @@ public class AlarmDetailActivity extends AppCompatActivity {
         btnSave = findViewById(R.id.btnSave);
 
         selectedDate = getIntent().getStringExtra("selectedDate");
+        medName = getIntent().getStringExtra("medName");
 
         // ✅ 디버깅 로그 출력
         Log.d("AlarmDetail", "userId: " + userId);
@@ -70,6 +73,7 @@ public class AlarmDetailActivity extends AppCompatActivity {
                         if (alarmData != null && alarmData.getAlarmItems() != null) {
                             alarmItems.clear();
                             alarmItems.addAll(alarmData.getAlarmItems());
+                            originalItemCount = alarmItems.size();
                             adapter.notifyDataSetChanged();
                         }
                     } else {
@@ -84,7 +88,7 @@ public class AlarmDetailActivity extends AppCompatActivity {
 
     private void saveAlarmDataToFirestore() {
         AlarmData updatedData = new AlarmData();
-        updatedData.setMedName("kamki"); // TODO: 실제 이름 연동 필요 시 수정
+        updatedData.setMedName(medName == null ? "" : medName);
         updatedData.setAlarmItems(alarmItems);
         updatedData.setDate(selectedDate);
 
@@ -94,7 +98,7 @@ public class AlarmDetailActivity extends AppCompatActivity {
                 .document(selectedDate)
                 .set(updatedData)
                 .addOnSuccessListener(aVoid -> {
-                    AlarmNotificationHelper.cancelAlarms(this, selectedDate, alarmItems.size());
+                    AlarmNotificationHelper.cancelAlarms(this, selectedDate, originalItemCount);
                     AlarmNotificationHelper.scheduleAlarms(this, selectedDate, alarmItems);
                     Toast.makeText(this, "저장 완료!", Toast.LENGTH_SHORT).show();
                     finish();
